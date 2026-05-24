@@ -1,0 +1,42 @@
+name: "维修工作总结"
+description: "周/月维修工作总结报告"
+category: "维修报告"
+icon: "📑"
+doc_type: "docx"
+
+variables:
+  - name: "period"
+    label: "总结周期"
+    type: "select"
+    options: ["本周", "本月", "本季度"]
+    default: "本月"
+    required: true
+
+  - name: "repair_data"
+    label: "维修数据"
+    type: "sql_query"
+    sql: "SELECT fault_type, COUNT(*) as count, AVG(repair_duration) as avg_duration FROM maintenance_record WHERE repair_date >= CURRENT_DATE - INTERVAL '30' DAY GROUP BY fault_type ORDER BY count DESC"
+    auto_fill: true
+    required: true
+
+  - name: "highlights"
+    label: "工作亮点（可选）"
+    type: "text"
+    required: false
+
+ai_prompt: |
+  你是维修工作总结专家。请撰写{{period}}维修工作总结：
+
+  周期：{{period}}
+  维修数据：{{repair_data}}
+  亮点：{{highlights}}
+
+  输出JSON，sections包含：
+  1. "一、工作概述" + 段落
+  2. "二、维修数据分析" + 段落 + 表格展示故障类型统计
+  3. "三、重点工作回顾" + 段落
+  4. "四、存在问题" + 段落
+  5. "五、下期计划" + 段落
+
+output:
+  filename: "维修工作总结_{{period}}_{{date}}.docx"

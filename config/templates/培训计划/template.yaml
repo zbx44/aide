@@ -1,0 +1,41 @@
+name: "培训计划"
+description: "员工培训计划安排"
+category: "行政管理"
+icon: "📝"
+doc_type: "docx"
+
+variables:
+  - name: "period"
+    label: "培训周期"
+    type: "select"
+    options: ["本月", "本季度", "本年度"]
+    default: "本季度"
+    required: true
+
+  - name: "training_focus"
+    label: "培训重点"
+    type: "text"
+    required: true
+
+  - name: "target_audience"
+    label: "培训对象"
+    type: "text"
+    default: "全体维修人员"
+    required: true
+
+ai_prompt: |
+  生成培训计划文档。
+
+  周期：{{period}}
+  重点：{{training_focus}}
+  对象：{{target_audience}}
+
+  输出JSON，sections包含：
+  1. "一、培训目标" + 段落
+  2. "二、培训内容" + 段落详细列出培训课程
+  3. "三、培训安排" + 表格展示时间、课程、讲师、地点
+  4. "四、考核方式" + 段落
+  5. "五、预期效果" + 段落
+
+output:
+  filename: "培训计划_{{period}}_{{date}}.docx"

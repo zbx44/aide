@@ -1,0 +1,55 @@
+name: "设备运行月报"
+description: "每月设备运行状况分析报告"
+category: "设备管理"
+icon: "📊"
+doc_type: "docx"
+
+template_file: "设备运行月报_模板.docx"
+
+variables:
+  - name: "report_month"
+    label: "报告月份"
+    type: "month"
+    default: "上个月"
+    required: true
+
+  - name: "workshop"
+    label: "车间范围"
+    type: "select"
+    options: ["一车间", "二车间", "三车间", "全厂"]
+    default: "全厂"
+    required: true
+
+  - name: "device_data"
+    label: "设备运行数据"
+    type: "sql_query"
+    sql: "SELECT device_name, device_code, run_hours, fault_count, status, workshop FROM device_status WHERE record_date >= CURRENT_DATE - INTERVAL '30' DAY ORDER BY fault_count DESC"
+    auto_fill: true
+    required: true
+
+  - name: "focus_devices"
+    label: "重点关注设备（可选）"
+    type: "text"
+    required: false
+
+ai_prompt: |
+  你是航空发动机维修工厂的设备分析专家。请根据以下信息撰写设备运行月报：
+
+  报告月份：{{report_month}}
+  车间范围：{{workshop}}
+  设备运行数据：{{device_data}}
+  重点关注：{{focus_devices}}
+
+  请输出JSON格式，包含以下sections：
+  1. 一级标题"一、运行概况" + 段落总结整体运行情况
+  2. 一级标题"二、故障统计分析" + 段落分析故障趋势 + 表格展示Top10故障设备
+  3. 一级标题"三、重点设备关注" + 段落分析重点设备情况
+  4. 一级标题"四、维护建议" + 段落给出具体维护建议
+
+  要求：
+  - 数据引用准确，不编造数据
+  - 故障分析要有具体原因和建议
+  - 语气正式专业
+
+output:
+  filename: "{{workshop}}设备运行月报_{{report_month}}.docx"

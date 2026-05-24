@@ -1,0 +1,74 @@
+{
+  "web_search": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "calculate": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "read_file": {
+    "visibility": "internal",
+    "enabled": true
+  },
+  "write_file": {
+    "visibility": "internal",
+    "enabled": true
+  },
+  "edit_file": {
+    "visibility": "internal",
+    "enabled": true
+  },
+  "list_dir": {
+    "visibility": "internal",
+    "enabled": true
+  },
+  "run_shell": {
+    "visibility": "internal",
+    "enabled": true
+  },
+  "git_operation": {
+    "visibility": "hidden",
+    "enabled": true
+  },
+  "create_document": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "analyze_data": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "ocr_recognize": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "query_database": {
+    "visibility": "hidden",
+    "enabled": false
+  },
+  "start_oa_process": {
+    "visibility": "hidden",
+    "enabled": false
+  },
+  "send_notification": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "manage_schedule": {
+    "visibility": "hidden",
+    "enabled": true
+  },
+  "evolve_self": {
+    "visibility": "hidden",
+    "enabled": true
+  },
+  "local_file_search": {
+    "visibility": "visible",
+    "enabled": true
+  },
+  "skill_toggle": {
+    "visibility": "visible",
+    "enabled": true
+  }
+}

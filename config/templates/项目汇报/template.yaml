@@ -1,0 +1,47 @@
+name: "项目汇报"
+description: "季度/年度项目汇报PPT"
+category: "项目管理"
+icon: "📊"
+doc_type: "pptx"
+
+variables:
+  - name: "project_name"
+    label: "项目名称"
+    type: "text"
+    required: true
+
+  - name: "period"
+    label: "汇报周期"
+    type: "select"
+    options: ["季度", "半年度", "年度"]
+    default: "季度"
+    required: true
+
+  - name: "key_results"
+    label: "核心成果"
+    type: "text"
+    required: true
+
+  - name: "challenges"
+    label: "存在问题（可选）"
+    type: "text"
+    required: false
+
+ai_prompt: |
+  生成项目汇报PPT。
+
+  项目：{{project_name}}
+  周期：{{period}}
+  核心成果：{{key_results}}
+  挑战：{{challenges}}
+
+  输出JSON，slides包含：
+  1. 封面：项目名称 + 副标题
+  2. 项目概述：项目背景和目标
+  3. 核心成果：重点工作及成果
+  4. 数据指标：关键数据展示
+  5. 存在问题：挑战分析
+  6. 下步计划：后续工作安排
+
+output:
+  filename: "{{project_name}}_汇报_{{date}}.pptx"

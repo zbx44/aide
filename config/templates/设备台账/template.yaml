@@ -1,0 +1,32 @@
+name: "设备台账"
+description: "设备清单及状态汇总"
+category: "设备管理"
+icon: "📊"
+doc_type: "xlsx"
+
+variables:
+  - name: "workshop"
+    label: "车间"
+    type: "select"
+    options: ["一车间", "二车间", "三车间", "全厂"]
+    default: "全厂"
+    required: true
+
+  - name: "device_data"
+    label: "设备数据"
+    type: "sql_query"
+    sql: "SELECT * FROM device_status ORDER BY device_code"
+    auto_fill: true
+    required: true
+
+ai_prompt: |
+  生成设备台账Excel。
+
+  车间：{{workshop}}
+  数据：{{device_data}}
+
+  输出JSON，sheets包含一个表格：
+  表头：设备编号、设备名称、所属车间、设备状态、累计运行时长、累计故障次数、最后巡检日期
+
+output:
+  filename: "设备台账_{{date}}.xlsx"

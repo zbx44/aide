@@ -1,0 +1,42 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ===== 运行时数据（含密码和私有配置）=====
+app/backend/data/
+app/backend/logs/
+app/backend/output/
+app/backend/user/
+*.db
+*.db-journal
+*.db-wal
+
+# ===== 前端 =====
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# ===== 用户上传 =====
+uploads/
+
+# ===== 离线包（太大，不含源码）=====
+*.whl
+cp312/
+cp38/
+python-3.*/
+PySide6-*.whl

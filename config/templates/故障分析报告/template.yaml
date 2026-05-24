@@ -1,0 +1,52 @@
+name: "故障分析报告"
+description: "单次故障详细分析报告"
+category: "维修报告"
+icon: "📋"
+doc_type: "docx"
+
+variables:
+  - name: "device_name"
+    label: "设备名称"
+    type: "text"
+    required: true
+
+  - name: "fault_date"
+    label: "故障日期"
+    type: "date"
+    required: true
+
+  - name: "fault_type"
+    label: "故障类型"
+    type: "text"
+    required: true
+
+  - name: "fault_description"
+    label: "故障描述"
+    type: "text"
+    required: true
+
+  - name: "repair_records"
+    label: "历史维修记录"
+    type: "sql_query"
+    sql: "SELECT * FROM maintenance_record WHERE device_code IN (SELECT device_code FROM device_status WHERE device_name = '{{device_name}}') ORDER BY repair_date DESC LIMIT 10"
+    auto_fill: true
+    required: false
+
+ai_prompt: |
+  你是航空发动机维修故障分析专家。请撰写故障分析报告：
+
+  设备：{{device_name}}
+  故障日期：{{fault_date}}
+  故障类型：{{fault_type}}
+  故障描述：{{fault_description}}
+  历史维修：{{repair_records}}
+
+  输出JSON，sections包含：
+  1. "一、故障概述" + 段落描述故障基本情况
+  2. "二、故障原因分析" + 段落深入分析原因
+  3. "三、处理措施" + 段落描述已采取的措施
+  4. "四、预防建议" + 段落给出预防建议
+  5. "五、后续跟踪" + 段落说明跟踪计划
+
+output:
+  filename: "故障分析_{{device_name}}_{{date}}.docx"

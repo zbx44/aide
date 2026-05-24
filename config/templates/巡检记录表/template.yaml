@@ -1,0 +1,29 @@
+name: "巡检记录表"
+description: "设备巡检记录表格"
+category: "质量管理"
+icon: "📝"
+doc_type: "xlsx"
+
+variables:
+  - name: "inspection_date"
+    label: "巡检日期"
+    type: "date"
+    default: "今天"
+    required: true
+
+  - name: "inspector"
+    label: "巡检人员"
+    type: "text"
+    required: true
+
+ai_prompt: |
+  生成巡检记录表Excel。
+
+  日期：{{inspection_date}}
+  巡检人员：{{inspector}}
+
+  输出JSON，sheets包含一个表格：
+  表头：序号、设备编号、设备名称、巡检时间、运行状态、温度、振动、噪音、外观、发现问题、严重程度、备注
+
+output:
+  filename: "巡检记录_{{date}}.xlsx"

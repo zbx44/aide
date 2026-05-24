@@ -1,0 +1,43 @@
+name: "设备运行日报"
+description: "每日设备运行状况快报"
+category: "设备管理"
+icon: "📈"
+doc_type: "docx"
+
+variables:
+  - name: "report_date"
+    label: "报告日期"
+    type: "date"
+    default: "今天"
+    required: true
+
+  - name: "workshop"
+    label: "车间"
+    type: "select"
+    options: ["一车间", "二车间", "三车间", "全厂"]
+    default: "全厂"
+    required: true
+
+  - name: "device_data"
+    label: "当日设备数据"
+    type: "sql_query"
+    sql: "SELECT device_name, run_hours, fault_count, status FROM device_status WHERE record_date = CURRENT_DATE"
+    auto_fill: true
+    required: true
+
+ai_prompt: |
+  你是设备运行分析专家。请根据今日数据生成简洁的设备运行日报：
+
+  日期：{{report_date}}
+  车间：{{workshop}}
+  数据：{{device_data}}
+
+  输出JSON，sections包含：
+  1. "一、运行概况" + 简短段落
+  2. "二、异常设备" + 列出故障设备（如无则写"运行正常"）
+  3. "三、注意事项" + 简短提醒
+
+  要求简洁，重点突出异常。
+
+output:
+  filename: "设备运行日报_{{date}}.docx"
