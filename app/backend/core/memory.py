@@ -380,10 +380,9 @@ class MemorySystem:
                 memory_context += f"- ({m['category']}) {m['content']}\n"
 
         if memory_context:
-            # 注入到第一条system消息后面，或者作为单独的上下文
             context_messages.append({
                 "role": "system",
-                "content": f"以下是你应该记住的上下文信息：{memory_context}"
+                "content": f"以下是供参考的背景信息，仅在与当前问题相关时使用：{memory_context}"
             })
 
         # 添加最近对话

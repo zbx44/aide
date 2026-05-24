@@ -131,10 +131,17 @@ async def chat(req: ChatRequest):
         for s in visible_skills
     )
     skill_context = f"""
-你可以使用以下工具来帮助用户（当用户需求匹配时，你会自动调用对应工具）：
+你可以使用以下工具来帮助用户（当用户需求匹配时，你必须调用对应工具，而不是纯文本猜测）：
 {skill_descriptions}
 
-注意：直接回答用户问题，如果需要用到工具会自动调用。不要提及工具的存在，自然地帮助用户。"""
+重要规则：
+- 用户问找文件/搜索文件 → 必须调用 local_file_search 的 search 动作
+- 用户要求浏览路径 → 必须调用 local_file_search 的 browse 动作
+- 用户要求查数据/做分析 → 必须调用 query_database 或 analyze_data
+- 用户要求生成文档 → 必须调用 create_document
+- 记忆中的信息只是背景参考，不能替代工具调用
+
+回答简洁明了，自然地帮助用户。"""
 
     # 构建完整消息列表
     messages = [{"role": "system", "content": system_prompt + skill_context}]
@@ -240,29 +247,39 @@ async def chat(req: ChatRequest):
             import asyncio as _aio
             loop = _aio.new_event_loop()
             try:
+                logger.info(f"[非流式] 后处理开始: conversation_id={conversation_id}")
                 loop.run_until_complete(
                     memory_system.extract_and_save_memories(conversation_id)
                 )
+                logger.info(f"[非流式] 记忆提取完成")
             except Exception as e:
-                logger.error(f"记忆提取失败: {e}")
+                logger.error(f"记忆提取失败: {e}", exc_info=True)
             try:
+                # 每轮检查：如果没有摘要且消息>=6条，就生成一个
+                existing = memory_system.get_summary(conversation_id)
                 msg_count = len(memory_system.get_messages(conversation_id))
-                if msg_count % 20 == 0:
+                if not existing and msg_count >= 6:
                     loop.run_until_complete(
                         memory_system.generate_summary(conversation_id)
                     )
+                    logger.info(f"[非流式] 摘要生成完成, 消息数={msg_count}")
+                elif msg_count % 20 == 0 and msg_count > 0:
+                    loop.run_until_complete(
+                        memory_system.generate_summary(conversation_id)
+                    )
+                    logger.info(f"[非流式] 摘要更新完成, 消息数={msg_count}")
             except Exception as e:
-                logger.error(f"摘要生成失败: {e}")
+                logger.error(f"摘要生成失败: {e}", exc_info=True)
             try:
                 loop.run_until_complete(
                     evolution_engine.on_conversation_turn(conversation_id)
                 )
             except Exception as e:
-                logger.error(f"进化检查失败: {e}")
+                logger.error(f"进化检查失败: {e}", exc_info=True)
             finally:
                 loop.close()
         except Exception as e:
-            logger.error(f"后处理整体失败: {e}")
+            logger.error(f"后处理整体失败: {e}", exc_info=True)
 
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _post_processing_blocking)
@@ -303,7 +320,7 @@ async def chat_stream(req: ChatRequest):
         f"- {s['display_name']}({s['name']}): {s['description']}"
         for s in visible_skills
     )
-    skill_context = f"\n\n你可以使用以下工具：\n{skill_descriptions}"
+    skill_context = f"""\n\n你可以使用以下工具来帮助用户（当用户需求匹配时，你必须调用对应工具，而不是纯文本猜测）：\n{skill_descriptions}\n\n重要规则：\n- 用户问找文件/搜索文件 → 必须调用 local_file_search 的 search 动作\n- 用户要求浏览路径 → 必须调用 local_file_search 的 browse 动作\n- 用户要求查数据/做分析 → 必须调用 query_database 或 analyze_data\n- 用户要求生成文档 → 必须调用 create_document\n- 记忆中的信息只是背景参考，不能替代工具调用\n\n回答简洁明了，自然地帮助用户。"""
 
     messages = [{"role": "system", "content": system_prompt + skill_context}]
 
@@ -475,23 +492,34 @@ async def chat_stream(req: ChatRequest):
                 loop = _aio.new_event_loop()
                 try:
                     if not is_error:
+                        logger.info(f"后处理开始: conversation_id={conversation_id}")
                         loop.run_until_complete(
                             memory_system.extract_and_save_memories(conversation_id)
                         )
                         msg_count = len(memory_system.get_messages(conversation_id))
-                        if msg_count % 20 == 0:
+                        logger.info(f"记忆提取完成, 消息数={msg_count}")
+                        # 每轮检查：如果没有摘要且消息>=6条，就生成
+                        existing = memory_system.get_summary(conversation_id)
+                        if not existing and msg_count >= 6:
                             loop.run_until_complete(
                                 memory_system.generate_summary(conversation_id)
                             )
+                            logger.info(f"摘要生成完成, 消息数={msg_count}")
+                        elif msg_count % 20 == 0 and msg_count > 0:
+                            loop.run_until_complete(
+                                memory_system.generate_summary(conversation_id)
+                            )
+                            logger.info(f"摘要更新完成, 消息数={msg_count}")
                         loop.run_until_complete(
                             evolution_engine.on_conversation_turn(conversation_id)
                         )
+                        logger.info("后处理完成")
                 except Exception as e:
-                    logger.error(f"后处理失败: {e}")
+                    logger.error(f"后处理失败: {e}", exc_info=True)
                 finally:
                     loop.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"后处理线程启动失败: {e}", exc_info=True)
 
         try:
             asyncio.get_event_loop().run_in_executor(None, _post_blocking)
@@ -529,12 +557,14 @@ async def delete_conversation(conversation_id: str):
 
 @router.get("/conversations/{conversation_id}/summarize")
 async def summarize_conversation(conversation_id: str):
-    """手动触发对话摘要"""
+    """获取对话摘要（只读缓存，不触发LLM，避免切换卡顿）"""
     try:
-        summary = await memory_system.generate_summary(conversation_id)
-        return {"summary": summary}
+        summary = memory_system.get_summary(conversation_id)
+        if summary:
+            return {"summary": summary["summary"], "key_topics": summary.get("key_topics", [])}
+        return {"summary": "", "key_topics": []}
     except Exception as e:
-        logger.warning(f"生成摘要失败: {e}")
+        logger.warning(f"获取摘要失败: {e}")
         return {"summary": "", "error": str(e)}
 
 

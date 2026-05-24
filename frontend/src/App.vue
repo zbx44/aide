@@ -14,37 +14,37 @@
         active-text-color="#409eff"
       >
         <el-menu-item index="/chat">
-          <span>💬 对话</span>
+          <el-icon><ChatDotRound /></el-icon><span>对话</span>
         </el-menu-item>
         <el-menu-item index="/knowledge">
-          <span>📚 知识库</span>
+          <el-icon><Collection /></el-icon><span>知识库</span>
         </el-menu-item>
         <el-menu-item index="/doc">
-          <span>📄 文档</span>
+          <el-icon><Document /></el-icon><span>文档</span>
         </el-menu-item>
         <el-menu-item index="/templates">
-          <span>📝 模板</span>
+          <el-icon><Notebook /></el-icon><span>模板</span>
         </el-menu-item>
         <el-menu-item index="/agents">
-          <span>🤖 智能体</span>
+          <el-icon><Monitor /></el-icon><span>智能体</span>
         </el-menu-item>
         <el-menu-item index="/task">
-          <span>📊 任务</span>
+          <el-icon><DataAnalysis /></el-icon><span>任务</span>
         </el-menu-item>
         <el-menu-item index="/query">
-          <span>🔍 查数据</span>
+          <el-icon><Search /></el-icon><span>查数据</span>
         </el-menu-item>
         <el-menu-item index="/skills">
-          <span>🔧 技能</span>
+          <el-icon><SetUp /></el-icon><span>技能</span>
         </el-menu-item>
         <el-menu-item index="/tool">
-          <span>🛠 工具</span>
+          <el-icon><SetUp /></el-icon><span>工具</span>
         </el-menu-item>
         <el-menu-item index="/help">
-          <span>❓ 帮助</span>
+          <el-icon><QuestionFilled /></el-icon><span>帮助</span>
         </el-menu-item>
         <el-menu-item index="/settings">
-          <span>⚙️ 设置</span>
+          <el-icon><Setting /></el-icon><span>设置</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

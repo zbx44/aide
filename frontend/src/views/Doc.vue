@@ -5,7 +5,7 @@
       <el-col :span="12">
         <el-card>
           <template #header>
-            <span>📄 生成文档</span>
+            <span><el-icon><Document /></el-icon> 生成文档</span>
           </template>
           <el-form label-position="top">
             <el-form-item label="文档类型">
@@ -54,7 +54,7 @@
       <el-col :span="12">
         <el-card>
           <template #header>
-            <span>📂 文档列表</span>
+            <span><el-icon><FolderOpened /></el-icon> 文档列表</span>
           </template>
           <el-table :data="docs" stripe>
             <el-table-column prop="title" label="标题" />

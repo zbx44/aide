@@ -5,7 +5,7 @@
         <el-card>
           <template #header>
             <div style="display: flex; justify-content: space-between;">
-              <span>📊 定时分析任务</span>
+              <span><el-icon><DataAnalysis /></el-icon> 定时分析任务</span>
               <el-button type="primary" size="small" @click="showCreateDialog = true">
                 新建任务
               </el-button>

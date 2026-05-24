@@ -4,7 +4,7 @@
     <WelcomeGuide ref="welcomeGuide" @try-example="onTryExample" />
 
     <!-- 渐进提示 -->
-    <FeatureTip tip-id="first-upload" text="你可以上传文件让我分析，试试点击📎按钮" position="bottom-right" />
+    <FeatureTip tip-id="first-upload" text="你可以上传文件让我分析，试试点击上传按钮" position="bottom-right" />
 
     <!-- 对话列表 -->
     <div class="conversation-list" v-if="showSidebar">
@@ -18,8 +18,9 @@
         :class="{ active: conv.conversation_id === currentConvId }"
         @click="selectConversation(conv.conversation_id)"
       >
-        <span>{{ conv.last_message || '新对话' }}</span>
+        <span class="conv-title">{{ conv.last_message || '新对话' }}</span>
         <span class="conv-time">{{ formatTime(conv.last_at) }}</span>
+        <span class="conv-delete" @click.stop="deleteConversation(conv.conversation_id)" title="删除对话"><el-icon><Delete /></el-icon></span>
       </div>
     </div>
 
@@ -84,16 +85,26 @@
 
       <!-- 输入框 -->
       <div class="input-area">
-        <!-- 知识库选择 -->
-        <div class="kb-selector">
+        <!-- 顶部快捷栏 -->
+        <div class="input-toolbar">
+          <el-button size="small" text @click="showSkillPanel = true" title="可用技能">
+            <el-icon><SetUp /></el-icon> 技能
+          </el-button>
+          <el-button size="small" text @click="showMemoryPanel = true" title="记忆">
+            <el-icon><Cpu /></el-icon> 记忆
+          </el-button>
+          <el-button size="small" text @click="showEvolvePanel = true" title="自我进化">
+            <el-icon><MagicStick /></el-icon> 进化
+          </el-button>
+          <div style="flex:1"></div>
           <el-select
             v-model="selectedKbIds"
             multiple
             collapse-tags
             collapse-tags-tooltip
-            :placeholder="knowledgeBases.length ? '📚 选择知识库增强回答' : '📚 暂无知识库，请先在知识库页面创建'"
+            :placeholder="knowledgeBases.length ? '选择知识库增强回答' : '暂无知识库'"
             size="small"
-            style="width: 100%"
+            style="width: 240px"
             clearable
             :disabled="!knowledgeBases.length"
           >
@@ -108,9 +119,9 @@
             </el-option>
           </el-select>
         </div>
-        <div class="input-row">
-          <div class="input-main">
-          <!-- 已上传文件预览 -->
+        <!-- 输入框 + 附件 + 发送 -->
+        <div class="input-box">
+          <!-- 已上传附件预览 -->
           <div class="file-preview" v-if="uploadedFiles.length">
             <div v-for="(f, idx) in uploadedFiles" :key="idx" class="file-chip">
               <span class="file-icon">{{ fileIcon(f.type) }}</span>
@@ -118,44 +129,39 @@
               <el-button link size="small" @click="removeFile(idx)">✕</el-button>
             </div>
           </div>
-          <el-input
-            v-model="inputText"
-            type="textarea"
-            :rows="3"
-            placeholder="输入消息，Enter发送，Shift+Enter换行..."
-            @keydown.enter.exact="sendMessage"
-          />
+          <div class="input-row-bottom">
+            <el-input
+              v-model="inputText"
+              type="textarea"
+              :rows="2"
+              :autosize="{ minRows: 2, maxRows: 6 }"
+              placeholder="输入消息..."
+              @keydown.enter.exact="sendMessage"
+              resize="none"
+            />
+            <div class="input-side">
+              <el-button text circle @click="triggerUpload" title="添加附件" :loading="uploading">
+                <el-icon :size="20"><Paperclip /></el-icon>
+              </el-button>
+              <input
+                ref="fileInput"
+                type="file"
+                multiple
+                accept=".docx,.xlsx,.pptx,.pdf,.png,.jpg,.jpeg,.gif,.bmp,.webp,.txt,.md,.csv,.json,.yaml,.yml"
+                style="display: none"
+                @change="handleFileSelect"
+              />
+              <el-button type="primary" circle @click="sendMessage" :loading="loading" title="发送">
+                <el-icon :size="20"><Promotion /></el-icon>
+              </el-button>
+            </div>
           </div>
-          <div class="input-actions">
-          <el-button type="primary" @click="sendMessage" :loading="loading">
-            发送
-          </el-button>
-          <el-button @click="triggerUpload" title="上传文件" :loading="uploading">
-            📎
-          </el-button>
-          <input
-            ref="fileInput"
-            type="file"
-            multiple
-            accept=".docx,.xlsx,.pptx,.pdf,.png,.jpg,.jpeg,.gif,.bmp,.webp,.txt,.md,.csv,.json,.yaml,.yml"
-            style="display: none"
-            @change="handleFileSelect"
-          />
-          <el-button @click="showSkillPanel = true" title="查看可用技能">
-            🔧
-          </el-button>
-          <el-button @click="showMemoryPanel = true" title="查看记忆">
-            🧠
-          </el-button>
-          <el-button @click="showEvolvePanel = true" title="自我进化">
-            🧬
-          </el-button>
         </div>
       </div>
     </div>
 
     <!-- Skill面板 -->
-    <el-drawer v-model="showSkillPanel" title="🔧 可用技能" direction="rtl" size="380px">
+    <el-drawer v-model="showSkillPanel" title="可用技能" direction="rtl" size="380px">
       <div class="skill-level-info">
         <el-tag :type="levelTagType">{{ levelInfo.current_level_label }}</el-tag>
         <span class="level-progress">{{ levelInfo.next_level_requirement }}</span>
@@ -179,11 +185,11 @@
     </el-drawer>
 
     <!-- 记忆面板 -->
-    <el-drawer v-model="showMemoryPanel" title="🧠 记忆" direction="rtl" size="420px">
+    <el-drawer v-model="showMemoryPanel" title="记忆" direction="rtl" size="420px">
       <el-tabs>
         <el-tab-pane label="长期记忆">
           <el-input v-model="memorySearchQuery" placeholder="搜索记忆..." @input="searchMemory" clearable>
-            <template #prefix>🔍</template>
+            <template #prefix><el-icon><Search /></el-icon></template>
           </el-input>
           <div class="memory-list">
             <div v-for="mem in memoryResults" :key="mem.id" class="memory-item">
@@ -207,7 +213,7 @@
     </el-drawer>
 
     <!-- 进化面板 -->
-    <el-drawer v-model="showEvolvePanel" title="🧬 自我进化" direction="rtl" size="420px">
+    <el-drawer v-model="showEvolvePanel" title="自我进化" direction="rtl" size="420px">
       <div class="evolve-status">
         <el-descriptions :column="2" size="small" border>
           <el-descriptions-item label="Prompt版本">v{{ evolveStatus.prompt_version }}</el-descriptions-item>
@@ -221,7 +227,7 @@
         <el-input v-model="evolveInstruction" type="textarea" :rows="2"
                   placeholder="输入改进指令，如：回答更简洁、记住我喜欢表格格式..." />
         <el-button type="primary" @click="triggerEvolve" :loading="evolving" style="margin-top: 8px;">
-          🧬 执行进化
+          <el-icon><MagicStick /></el-icon> 执行进化
         </el-button>
       </div>
 
@@ -236,11 +242,10 @@
       <el-empty v-if="!evolveLogs.length" description="暂无进化记录" />
     </el-drawer>
   </div>
-  </div>
 </template>
 
 <script>
-import { chatStream, getConversations, getMessages, searchMemory, getSummary, uploadFiles, listKnowledgeBases } from '../api'
+import { chatStream, getConversations, getMessages, searchMemory, getSummary, uploadFiles, listKnowledgeBases, deleteConversation, listLongTermMemory } from '../api'
 import {
   getSkills, getEvolveStatus, getEvolveLogs, manualEvolve
 } from '../api'
@@ -426,6 +431,25 @@ export default {
         this.$nextTick(() => this.scrollToBottom())
         this.loadSummary(id)
       } catch (e) { console.error(e) }
+    },
+    async deleteConversation(id) {
+      try {
+        await this.$confirm('确定删除这个对话？删除后不可恢复。', '确认删除', {
+          confirmButtonText: '删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        await deleteConversation(id)
+        if (this.currentConvId === id) {
+          this.currentConvId = null
+          this.messages = []
+          this.currentSummary = null
+        }
+        this.loadConversations()
+        this.$message.success('已删除')
+      } catch (e) {
+        if (e !== 'cancel') this.$message.error('删除失败')
+      }
     },
     async loadSummary(id) {
       try {
@@ -632,14 +656,15 @@ export default {
 
     // ===== Memory =====
     async searchMemory() {
-      if (!this.memorySearchQuery) {
-        this.memoryResults = []
-        return
-      }
       try {
-        const { data } = await searchMemory(this.memorySearchQuery)
-        this.memoryResults = data
-      } catch (e) { console.error(e) }
+        if (this.memorySearchQuery) {
+          const { data } = await searchMemory(this.memorySearchQuery)
+          this.memoryResults = data
+        } else {
+          const { data } = await listLongTermMemory()
+          this.memoryResults = data.memories || data || []
+        }
+      } catch (e) { console.error(e); this.memoryResults = [] }
     },
 
     // ===== Evolution =====
@@ -698,14 +723,32 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .conv-item:hover { background: #e8e8e8; }
 .conv-item.active { background: #ddd; }
+.conv-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .conv-time {
-  float: right;
   font-size: 11px;
   color: #999;
+  flex-shrink: 0;
 }
+.conv-delete {
+  display: none;
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.conv-delete:hover { opacity: 1; }
+.conv-item:hover .conv-delete { display: inline; }
+.conv-item:hover .conv-time { display: none; }
 .chat-area {
   flex: 1;
   display: flex;
@@ -747,19 +790,58 @@ export default {
 .input-area {
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 8px;
+  padding: 8px 12px 12px;
+  gap: 6px;
   border-top: 1px solid #ddd;
   background: #fff;
 }
-.kb-selector { padding: 0 0 4px 0; }
-.input-area .input-row { display: flex; gap: 12px; }
-.input-main { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.input-area .el-textarea { flex: 1; }
-.input-actions {
+.input-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.input-toolbar .el-button { padding: 4px 8px; }
+.input-box {
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.input-box:focus-within {
+  border-color: #409eff;
+}
+.input-row-bottom {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+.input-row-bottom .el-textarea {
+  flex: 1;
+}
+.input-row-bottom .el-textarea :deep(.el-textarea__inner) {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px 12px;
+  background: transparent;
+  resize: none;
+}
+.input-side {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+}
+.send-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+.send-hint {
+  font-size: 12px;
+  color: #999;
 }
 
 /* File upload */

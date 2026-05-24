@@ -1,13 +1,13 @@
 <template>
   <div class="settings-page">
     <div class="settings-container">
-      <h1>⚙️ 系统设置</h1>
+      <h1><el-icon><Setting /></el-icon> 系统设置</h1>
 
       <!-- LLM Provider切换 -->
       <el-card class="setting-card">
         <template #header>
           <div class="card-header">
-            <span>🧠 大模型配置</span>
+            <span><el-icon><Cpu /></el-icon> 大模型配置</span>
             <el-tag :type="llmStatus.thinking_model ? 'warning' : 'success'" size="small">
               {{ llmStatus.thinking_model ? '思考模式' : '普通模式' }}
             </el-tag>
@@ -17,10 +17,10 @@
         <el-form label-width="120px">
           <el-form-item label="当前Provider">
             <el-radio-group v-model="selectedProvider" @change="switchProvider">
-              <el-radio-button value="vllm">🖥️ 本地vLLM</el-radio-button>
-              <el-radio-button value="tencent">☁️ 腾讯混元</el-radio-button>
-              <el-radio-button value="openai">🌐 OpenAI兼容</el-radio-button>
-              <el-radio-button value="custom">🔧 自定义</el-radio-button>
+              <el-radio-button value="vllm"><el-icon><Monitor /></el-icon> 本地vLLM</el-radio-button>
+              <el-radio-button value="tencent"><el-icon><Cloudy /></el-icon> 腾讯混元</el-radio-button>
+              <el-radio-button value="openai"><el-icon><Connection /></el-icon> OpenAI兼容</el-radio-button>
+              <el-radio-button value="custom"><el-icon><SetUp /></el-icon> 自定义</el-radio-button>
             </el-radio-group>
           </el-form-item>
 
@@ -50,14 +50,14 @@
         </el-form>
 
         <el-collapse v-model="expandedProviders" class="provider-config">
-          <el-collapse-item title="🖥️ 本地vLLM" name="vllm">
+          <el-collapse-item title="<el-icon><Monitor /></el-icon> 本地vLLM" name="vllm">
             <el-form label-width="120px" size="small">
               <el-form-item label="API地址"><el-input v-model="providerConfigs.vllm.base_url" placeholder="http://localhost:8000/v1" /></el-form-item>
               <el-form-item label="API Key"><el-input v-model="providerConfigs.vllm.api_key" placeholder="本地部署通常不需要" /></el-form-item>
               <el-form-item label="模型名"><el-input v-model="providerConfigs.vllm.model" placeholder="qwen3.6-27B" /></el-form-item>
             </el-form>
           </el-collapse-item>
-          <el-collapse-item title="☁️ 腾讯混元" name="tencent">
+          <el-collapse-item title="<el-icon><Cloudy /></el-icon> 腾讯混元" name="tencent">
             <el-form label-width="120px" size="small">
               <el-form-item label="API地址"><el-input v-model="providerConfigs.tencent.base_url" placeholder="https://api.lkeap.cloud.tencent.com/plan/v3" /></el-form-item>
               <el-form-item label="API Key"><el-input v-model="providerConfigs.tencent.api_key" type="password" show-password /></el-form-item>
@@ -70,14 +70,14 @@
               </el-form-item>
             </el-form>
           </el-collapse-item>
-          <el-collapse-item title="🌐 OpenAI兼容" name="openai">
+          <el-collapse-item title="<el-icon><Connection /></el-icon> OpenAI兼容" name="openai">
             <el-form label-width="120px" size="small">
               <el-form-item label="API地址"><el-input v-model="providerConfigs.openai.base_url" placeholder="https://api.deepseek.com/v1" /></el-form-item>
               <el-form-item label="API Key"><el-input v-model="providerConfigs.openai.api_key" type="password" show-password /></el-form-item>
               <el-form-item label="模型名"><el-input v-model="providerConfigs.openai.model" placeholder="deepseek-chat" /></el-form-item>
             </el-form>
           </el-collapse-item>
-          <el-collapse-item title="🔧 自定义" name="custom">
+          <el-collapse-item title="<el-icon><SetUp /></el-icon> 自定义" name="custom">
             <el-form label-width="120px" size="small">
               <el-form-item label="API地址"><el-input v-model="providerConfigs.custom.base_url" /></el-form-item>
               <el-form-item label="API Key"><el-input v-model="providerConfigs.custom.api_key" type="password" show-password /></el-form-item>
@@ -94,7 +94,7 @@
       <el-card class="setting-card" style="margin-top: 16px;">
         <template #header>
           <div class="card-header">
-            <span>🗄️ 数据源配置</span>
+            <span><el-icon><Coin /></el-icon> 数据源配置</span>
             <el-button type="primary" size="small" @click="showAddDsDialog()">＋ 添加数据源</el-button>
           </div>
         </template>
@@ -140,7 +140,7 @@
               <el-option value="dm" label="🗄️ 达梦数据库" />
               <el-option value="mysql" label="🐬 MySQL" />
               <el-option value="postgresql" label="🐘 PostgreSQL" />
-              <el-option value="sqlite" label="📄 SQLite" />
+              <el-option value="sqlite" label="<el-icon><Document /></el-icon> SQLite" />
             </el-select>
           </el-form-item>
 

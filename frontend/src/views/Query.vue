@@ -157,7 +157,7 @@
       <!-- 数据表格 -->
       <div v-if="result.columns && result.columns.length" class="data-table">
         <div class="table-header">
-          <span>📊 查询结果（{{ result.total }} 条）</span>
+          <span><el-icon><DataAnalysis /></el-icon> 查询结果（{{ result.total }} 条）</span>
           <el-button size="small" @click="exportCSV">📥 导出CSV</el-button>
         </div>
         <el-table :data="result.rows" stripe border size="small" max-height="400"

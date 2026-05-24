@@ -142,7 +142,7 @@
               <span>内线：<strong>8001</strong></span>
             </div>
             <div class="contact-item">
-              <span class="contact-icon">📧</span>
+              <span class="contact-icon"><el-icon><Message /></el-icon></span>
               <span>邮箱：<strong>admin@example.com</strong></span>
             </div>
             <div class="contact-item">
