@@ -827,9 +827,9 @@ export default {
 }
 .input-side {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 4px;
   padding: 6px 8px;
 }
 .send-bar {

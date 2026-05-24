@@ -35,6 +35,7 @@ _DEFAULTS = {
     "web_search":        {"visibility": "visible",  "enabled": True},
     "calculate":         {"visibility": "visible",  "enabled": True},
     "read_file":          {"visibility": "internal", "enabled": True},  # 后台工具，不暴露给用户
+    "open_file":          {"visibility": "visible",  "enabled": True},
     "write_file":         {"visibility": "internal", "enabled": True},
     "edit_file":          {"visibility": "internal", "enabled": True},
     "list_dir":           {"visibility": "internal", "enabled": True},  # 已并入 local_file_search.browse
@@ -95,6 +96,20 @@ BUILTIN_SKILLS = {
             "required": ["path"]
         },
         "category": "local_tool",
+    },
+    "open_file": {
+        "name": "open_file",
+        "display_name": "打开文件",
+        "description": "用系统默认程序打开本地文件或文件夹（如Word/PDF/图片等）",
+        "level": 2,
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "文件或文件夹的本地路径"}
+            },
+            "required": ["path"]
+        },
+        "category": "tool",
     },
     "write_file": {
         "name": "write_file",
@@ -844,7 +859,7 @@ class SkillManager:
         if not text:
             return text
         # 清理  格式
-        text = re.sub(r'<(\w+)(\s+[^>]*)?>([\s\S]*?)</\1>', lambda m: m.group(3).strip() if not any(kw in m.group(1) for kw in ['local_file_search', 'calculate', 'web_search', 'query_database', 'read_file', 'write_file', 'edit_file', 'list_dir', 'run_shell', 'git_operation', 'create_document', 'analyze_data', 'start_oa_process', 'send_notification', 'manage_schedule', 'evolve_self', 'ocr_recognize']) else '', text)
+        text = re.sub(r'<(\w+)(\s+[^>]*)?>([\s\S]*?)</\1>', lambda m: m.group(3).strip() if not any(kw in m.group(1) for kw in ['local_file_search', 'calculate', 'web_search', 'query_database', 'read_file', 'write_file', 'edit_file', 'list_dir', 'run_shell', 'git_operation', 'create_document', 'analyze_data', 'start_oa_process', 'send_notification', 'manage_schedule', 'evolve_self', 'ocr_recognize', 'open_file']) else '', text)
         # 清理自闭合标签
         text = re.sub(r'<(\w+)(\s+[^>]*)?/>', '', text)
         # 清理多余空行
@@ -1152,6 +1167,23 @@ class SkillManager:
                 return {"path": file_path, "content": content, "size": len(content)}
             except Exception as e:
                 return {"error": f"读取文件失败: {e}"}
+
+        elif name == "open_file":
+            try:
+                file_path = params.get("path", "")
+                if not os.path.exists(file_path):
+                    return {"error": f"文件不存在: {file_path}"}
+                import platform, subprocess
+                system = platform.system()
+                if system == "Windows":
+                    os.startfile(file_path)
+                elif system == "Darwin":
+                    subprocess.Popen(["open", file_path])
+                else:
+                    subprocess.Popen(["xdg-open", file_path])
+                return {"path": file_path, "status": "opened", "message": f"已用系统默认程序打开: {file_path}"}
+            except Exception as e:
+                return {"error": f"打开文件失败: {e}"}
 
         elif name == "write_file":
             try:

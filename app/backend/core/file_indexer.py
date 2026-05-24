@@ -1010,10 +1010,9 @@ class LocalFileIndexer:
                 })
 
             # 排序: 相似度降序 → 同分按修改时间降序
-            scored.sort(key=lambda x: (
-                -x["similarity"],
-                -(x["modified_time"] or "")
-            ))
+            # 注意: modified_time是字符串不能取负，用reverse+多轮排序
+            scored.sort(key=lambda x: x["modified_time"] or "", reverse=True)
+            scored.sort(key=lambda x: x["similarity"], reverse=True)
             results = scored[:limit]
 
         return results

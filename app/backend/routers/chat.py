@@ -83,12 +83,20 @@ async def upload_files(files: List[UploadFile] = File(...)):
             "text": text,
         }
 
-        # 图片额外提供base64（用于视觉模型）
+        # 图片额外提供base64（用于视觉模型）+ 自动OCR提取文字
         if file_type == "image":
             b64 = extract_image_base64(str(save_path))
             if b64:
                 result["image_base64"] = b64
                 result["media_type"] = get_image_media_type(filename)
+            # 自动OCR提取文字，确保非视觉模型也能用
+            try:
+                ocr_text = _ocr_image(str(save_path))
+                if ocr_text and ocr_text.strip():
+                    result["text"] = (result.get("text", "") + "\n\n[OCR识别结果]\n" + ocr_text).strip()
+                    logger.info(f"图片OCR完成: {filename}, 识别{len(ocr_text)}字")
+            except Exception as e:
+                logger.warning(f"图片OCR失败 {filename}: {e}")
 
         results.append(result)
 
@@ -100,6 +108,41 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
     return {"files": results}
 
+
+def _ocr_image(image_path: str) -> str:
+    """对图片执行OCR，优先PaddleOCR，回退LLM视觉模型"""
+    try:
+        from paddleocr import PaddleOCR
+        ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+        result = ocr.ocr(image_path, cls=True)
+        texts = []
+        for line in result:
+            if line:
+                for item in line:
+                    texts.append(item[1][0])
+        return "\n".join(texts)
+    except ImportError:
+        pass
+    try:
+        import base64 as b64mod
+        from core.llm import llm_client
+        with open(image_path, "rb") as f:
+            b64 = b64mod.b64encode(f.read()).decode()
+        ext = os.path.splitext(image_path)[1].lower()
+        mime_map = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                    ".gif": "image/gif", ".webp": "image/webp", ".bmp": "image/bmp"}
+        mime = mime_map.get(ext, "image/png")
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "请识别并提取这张图片中的所有文字，按原始格式输出。"},
+                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+            ]
+        }]
+        return llm_client.chat(messages, max_tokens=4096)
+    except Exception as e:
+        logger.warning(f"OCR回退失败: {e}")
+        return ""
 
 @router.post("")
 async def chat(req: ChatRequest):

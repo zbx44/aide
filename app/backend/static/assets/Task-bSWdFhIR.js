@@ -1,4 +1,4 @@
-import{i as x,z as v,e as D,u as V}from"./index-B47HzWK3.js";import{_ as $,o as A,d as L,f as t,w as l,h as o,e as n,t as k,c as a}from"./index-DMBPza9q.js";import"./index-DcNlVx-A.js";const Y=`name: "新任务"
+import{i as x,z as v,e as D,u as V}from"./index-B47HzWK3.js";import{_ as $,o as A,d as L,f as t,w as l,h as o,e as n,t as k,c as a}from"./index-CNh7JSPs.js";import"./index-DcNlVx-A.js";const Y=`name: "新任务"
 description: "任务描述"
 enabled: true
 

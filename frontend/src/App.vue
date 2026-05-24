@@ -37,9 +37,6 @@
         <el-menu-item index="/skills">
           <el-icon><SetUp /></el-icon><span>技能</span>
         </el-menu-item>
-        <el-menu-item index="/tool">
-          <el-icon><SetUp /></el-icon><span>工具</span>
-        </el-menu-item>
         <el-menu-item index="/help">
           <el-icon><QuestionFilled /></el-icon><span>帮助</span>
         </el-menu-item>
